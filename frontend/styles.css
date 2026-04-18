@@ -81,7 +81,16 @@ html, body {
 }
 
 /* Hero */
-.hero { display: flex; flex-direction: column; gap: 16px; }
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  cursor: grab;
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.hero:active { cursor: grabbing; }
 
 .hero-top {
   display: flex;
@@ -96,12 +105,7 @@ html, body {
   min-height: 40px;
   display: flex;
   align-items: center;
-  cursor: grab;
-  -webkit-app-region: drag;
-  app-region: drag;
 }
-
-.drag-title:active { cursor: grabbing; }
 
 .hero h1 {
   margin: 0;
@@ -126,6 +130,15 @@ html, body {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: inset 0 1px 0 var(--card-highlight);
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.search,
+.suggestions,
+.unit-toggle,
+button,
+input {
   -webkit-app-region: no-drag;
   app-region: no-drag;
 }
