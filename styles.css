@@ -384,10 +384,19 @@ html, body {
 
 .temperature {
   margin: 0;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
   font-size: 92px;
   font-weight: 200;
   line-height: 1;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
+  padding-right: 12px;
+  overflow: visible;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+#temp {
   background: linear-gradient(180deg, #fff, rgba(255,255,255,0.7));
   -webkit-background-clip: text;
   background-clip: text;
@@ -397,8 +406,9 @@ html, body {
 .temperature .deg {
   font-size: 44px;
   font-weight: 200;
-  vertical-align: top;
-  margin-left: 2px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.88);
+  flex: 0 0 auto;
 }
 
 .condition {
