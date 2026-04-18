@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.konrad.weather",
   "build": {
-    "frontendDist": "../",
+    "frontendDist": "../frontend",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "python3 -m http.server 1420 --directory ../",
+    "beforeDevCommand": "python3 -m http.server 1420 --directory ../frontend",
     "beforeBuildCommand": ""
   },
   "app": {
@@ -29,13 +29,32 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg"],
+    "targets": "all",
+    "category": "Weather",
+    "publisher": "Konrad Kempinski",
+    "shortDescription": "A lightweight desktop weather app.",
+    "longDescription": "A lightweight desktop weather app with current conditions, hourly weather, and a 7-day forecast.",
+    "createUpdaterArtifacts": false,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "signingIdentity": "-"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": null,
+      "signCommand": null,
+      "timestampUrl": null,
+      "tsp": false,
+      "webviewInstallMode": {
+        "type": "offlineInstaller",
+        "silent": true
+      }
+    }
   }
 }
