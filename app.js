@@ -1,36 +1,49 @@
 const GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
+const ICON_BASE = "https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg";
+
 const WEATHER_CODES = {
-  0:  { label: "Clear sky",             icon: "☀️", theme: "" },
-  1:  { label: "Mainly clear",          icon: "🌤️", theme: "" },
-  2:  { label: "Partly cloudy",         icon: "⛅",  theme: "cloud" },
-  3:  { label: "Overcast",              icon: "☁️", theme: "cloud" },
-  45: { label: "Fog",                   icon: "🌫️", theme: "cloud" },
-  48: { label: "Depositing rime fog",   icon: "🌫️", theme: "cloud" },
-  51: { label: "Light drizzle",         icon: "🌦️", theme: "rain" },
-  53: { label: "Moderate drizzle",      icon: "🌦️", theme: "rain" },
-  55: { label: "Dense drizzle",         icon: "🌧️", theme: "rain" },
-  56: { label: "Freezing drizzle",      icon: "🌧️", theme: "rain" },
-  57: { label: "Dense freezing drizzle", icon: "🌧️", theme: "rain" },
-  61: { label: "Light rain",            icon: "🌦️", theme: "rain" },
-  63: { label: "Rain",                  icon: "🌧️", theme: "rain" },
-  65: { label: "Heavy rain",            icon: "🌧️", theme: "rain" },
-  66: { label: "Freezing rain",         icon: "🌧️", theme: "rain" },
-  67: { label: "Heavy freezing rain",   icon: "🌧️", theme: "rain" },
-  71: { label: "Light snow",            icon: "🌨️", theme: "snow" },
-  73: { label: "Snow",                  icon: "❄️", theme: "snow" },
-  75: { label: "Heavy snow",            icon: "❄️", theme: "snow" },
-  77: { label: "Snow grains",           icon: "🌨️", theme: "snow" },
-  80: { label: "Rain showers",          icon: "🌦️", theme: "rain" },
-  81: { label: "Heavy showers",         icon: "🌧️", theme: "rain" },
-  82: { label: "Violent showers",       icon: "⛈️", theme: "storm" },
-  85: { label: "Snow showers",          icon: "🌨️", theme: "snow" },
-  86: { label: "Heavy snow showers",    icon: "❄️", theme: "snow" },
-  95: { label: "Thunderstorm",          icon: "⛈️", theme: "storm" },
-  96: { label: "Thunderstorm w/ hail",  icon: "⛈️", theme: "storm" },
-  99: { label: "Severe thunderstorm",   icon: "⛈️", theme: "storm" },
+  0:  { label: "Clear sky",              iconDay: "clear-day",              iconNight: "clear-night",              theme: "" },
+  1:  { label: "Mainly clear",           iconDay: "partly-cloudy-day",      iconNight: "partly-cloudy-night",      theme: "" },
+  2:  { label: "Partly cloudy",          iconDay: "partly-cloudy-day",      iconNight: "partly-cloudy-night",      theme: "cloud" },
+  3:  { label: "Overcast",               iconDay: "overcast-day",           iconNight: "overcast-night",           theme: "cloud" },
+  45: { label: "Fog",                    iconDay: "fog-day",                iconNight: "fog-night",                theme: "cloud" },
+  48: { label: "Depositing rime fog",    iconDay: "fog-day",                iconNight: "fog-night",                theme: "cloud" },
+  51: { label: "Light drizzle",          iconDay: "drizzle",                iconNight: "drizzle",                  theme: "rain" },
+  53: { label: "Moderate drizzle",       iconDay: "drizzle",                iconNight: "drizzle",                  theme: "rain" },
+  55: { label: "Dense drizzle",          iconDay: "extreme-drizzle",        iconNight: "extreme-drizzle",          theme: "rain" },
+  56: { label: "Freezing drizzle",       iconDay: "sleet",                  iconNight: "sleet",                    theme: "rain" },
+  57: { label: "Dense freezing drizzle", iconDay: "extreme-sleet",          iconNight: "extreme-sleet",            theme: "rain" },
+  61: { label: "Light rain",             iconDay: "partly-cloudy-day-rain", iconNight: "partly-cloudy-night-rain", theme: "rain" },
+  63: { label: "Rain",                   iconDay: "rain",                   iconNight: "rain",                     theme: "rain" },
+  65: { label: "Heavy rain",             iconDay: "extreme-rain",           iconNight: "extreme-rain",             theme: "rain" },
+  66: { label: "Freezing rain",          iconDay: "sleet",                  iconNight: "sleet",                    theme: "rain" },
+  67: { label: "Heavy freezing rain",    iconDay: "extreme-sleet",          iconNight: "extreme-sleet",            theme: "rain" },
+  71: { label: "Light snow",             iconDay: "partly-cloudy-day-snow", iconNight: "partly-cloudy-night-snow", theme: "snow" },
+  73: { label: "Snow",                   iconDay: "snow",                   iconNight: "snow",                     theme: "snow" },
+  75: { label: "Heavy snow",             iconDay: "extreme-snow",           iconNight: "extreme-snow",             theme: "snow" },
+  77: { label: "Snow grains",            iconDay: "snow",                   iconNight: "snow",                     theme: "snow" },
+  80: { label: "Rain showers",           iconDay: "partly-cloudy-day-rain", iconNight: "partly-cloudy-night-rain", theme: "rain" },
+  81: { label: "Heavy showers",          iconDay: "rain",                   iconNight: "rain",                     theme: "rain" },
+  82: { label: "Violent showers",        iconDay: "extreme-rain",           iconNight: "extreme-rain",             theme: "storm" },
+  85: { label: "Snow showers",           iconDay: "partly-cloudy-day-snow", iconNight: "partly-cloudy-night-snow", theme: "snow" },
+  86: { label: "Heavy snow showers",     iconDay: "extreme-snow",           iconNight: "extreme-snow",             theme: "snow" },
+  95: { label: "Thunderstorm",           iconDay: "thunderstorms-day",      iconNight: "thunderstorms-night",      theme: "storm" },
+  96: { label: "Thunderstorm w/ hail",   iconDay: "thunderstorms-day-rain", iconNight: "thunderstorms-night-rain", theme: "storm" },
+  99: { label: "Severe thunderstorm",    iconDay: "thunderstorms-day-rain", iconNight: "thunderstorms-night-rain", theme: "storm" },
 };
+
+function iconUrl(code, isDay) {
+  const d = WEATHER_CODES[code] ?? WEATHER_CODES[0];
+  const name = isDay ? d.iconDay : d.iconNight;
+  return `${ICON_BASE}/${name}.svg`;
+}
+
+function weatherImg(code, isDay, size) {
+  const d = WEATHER_CODES[code] ?? WEATHER_CODES[0];
+  return `<img src="${iconUrl(code, isDay)}" alt="${d.label}" width="${size}" height="${size}" loading="lazy">`;
+}
 
 const els = {
   form: document.getElementById("search-form"),
@@ -66,7 +79,7 @@ function setStatus(msg, isError = false) {
 }
 
 function describe(code) {
-  return WEATHER_CODES[code] ?? { label: "Unknown", icon: "❔", theme: "" };
+  return WEATHER_CODES[code] ?? { label: "Unknown", iconDay: "clear-day", iconNight: "clear-night", theme: "" };
 }
 
 function setTheme(code, isDay) {
@@ -136,7 +149,7 @@ function renderCurrent(place, data) {
     hour: "numeric",
     minute: "2-digit",
   });
-  els.icon.textContent = d.icon;
+  els.icon.innerHTML = weatherImg(c.weather_code, c.is_day, 80);
   els.temp.textContent = Math.round(c.temperature_2m);
   els.condition.textContent = d.label;
   els.feels.textContent = `${Math.round(c.apparent_temperature)}°`;
@@ -162,7 +175,7 @@ function renderHourly(data) {
     items.push(`
       <li class="${isNow ? "now" : ""}" style="--i:${i - startIdx}">
         <span class="h-time">${formatHour(h.time[i], isNow)}</span>
-        <span class="h-icon" aria-hidden="true">${d.icon}</span>
+        <span class="h-icon">${weatherImg(h.weather_code[i], h.is_day[i], 28)}</span>
         <span class="h-temp">${Math.round(h.temperature_2m[i])}°</span>
       </li>
     `);
@@ -191,7 +204,7 @@ function renderForecast(data) {
     li.style.setProperty("--i", i);
     li.innerHTML = `
       <span class="day">${formatDay(date, i)}</span>
-      <span class="fi" aria-hidden="true">${d.icon}</span>
+      <span class="fi">${weatherImg(days.weather_code[i], true, 30)}</span>
       <span class="bar"><span class="fill" style="left:${left}%;width:${width}%"></span></span>
       <span class="range">
         <span class="lo">${Math.round(lo)}°</span>

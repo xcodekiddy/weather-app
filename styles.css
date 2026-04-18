@@ -357,10 +357,16 @@ html, body {
 }
 
 .icon {
-  font-size: 60px;
   line-height: 1;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
   animation: float 6s ease-in-out infinite;
+  flex: 0 0 auto;
+}
+
+.icon img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.25));
 }
 
 @keyframes float {
@@ -501,9 +507,11 @@ html, body {
   letter-spacing: 0.06em;
 }
 
-.hourly-list .h-icon {
-  font-size: 22px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+.hourly-list .h-icon img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
 }
 
 .hourly-list .h-temp { font-weight: 600; font-size: 15px; }
@@ -535,9 +543,11 @@ html, body {
   font-size: 15px;
 }
 
-.forecast-list .fi {
-  font-size: 22px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+.forecast-list .fi img {
+  display: block;
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
 }
 
 .forecast-list .range {
