@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://api.open-meteo.com" />
+  <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <main class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <h1>Weather</h1>
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
+          <button type="button" data-unit="f" class="active">°F</button>
+          <button type="button" data-unit="c">°C</button>
+          <span class="unit-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <form id="search-form" class="search" role="search" autocomplete="off">
+          <button type="button" id="locate-btn" class="locate" aria-label="Use my current location" title="Use my current location">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <circle cx="12" cy="12" r="8"></circle>
+              <line x1="12" y1="1" x2="12" y2="4"></line>
+              <line x1="12" y1="20" x2="12" y2="23"></line>
+              <line x1="1" y1="12" x2="4" y2="12"></line>
+              <line x1="20" y1="12" x2="23" y2="12"></line>
+            </svg>
+          </button>
+          <input
+            id="search-input"
+            type="text"
+            name="city"
+            placeholder="Search for a city…"
+            aria-label="City"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+            aria-expanded="false"
+            role="combobox"
+            required
+          />
+          <button type="submit" class="submit" aria-label="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+        <ul id="suggestions" class="suggestions card" role="listbox" hidden></ul>
+      </div>
+    </header>
+
+    <section id="status" class="status" aria-live="polite"></section>
+
+    <section id="current" class="current card" hidden>
+      <div class="current-top">
+        <div>
+          <h2 id="location" class="location"></h2>
+          <p id="local-time" class="local-time"></p>
+        </div>
+        <div id="icon" class="icon" aria-hidden="true"></div>
+      </div>
+      <div class="current-mid">
+        <p class="temperature"><span id="temp"></span><span class="deg">°</span></p>
+        <p id="condition" class="condition"></p>
+      </div>
+      <dl class="details">
+        <div><dt>Feels like</dt><dd id="feels"></dd></div>
+        <div><dt>Humidity</dt><dd id="humidity"></dd></div>
+        <div><dt>Wind</dt><dd id="wind"></dd></div>
+        <div><dt>Precipitation</dt><dd id="precip"></dd></div>
+      </dl>
+    </section>
+
+    <section id="hourly" class="hourly" hidden>
+      <h3>Next 24 hours</h3>
+      <ul id="hourly-list" class="hourly-list card"></ul>
+    </section>
+
+    <section id="forecast" class="forecast" hidden>
+      <h3>7-day forecast</h3>
+      <ul id="forecast-list" class="forecast-list card"></ul>
+    </section>
+
+    <footer class="footer">
+      <small>Data: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></small>
+      <small class="credit">Made by Konrad Kempinski</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

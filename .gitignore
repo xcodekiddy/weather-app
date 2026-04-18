@@ -1,0 +1,13 @@
+# macOS
+.DS_Store
+
+# Build output
+weather-site.zip
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Editor
+.vscode/
+.idea/
