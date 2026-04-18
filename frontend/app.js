@@ -436,7 +436,20 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".search-wrap")) hideSuggestions();
 });
 
+function setupWindowDrag() {
+  const dragRegion = document.querySelector("[data-window-drag]");
+  const getCurrentWindow = window.__TAURI__?.window?.getCurrentWindow;
+  if (!dragRegion || !getCurrentWindow) return;
+
+  const appWindow = getCurrentWindow();
+  dragRegion.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 || e.target.closest("[data-no-drag], button, input, a")) return;
+    appWindow.startDragging().catch(() => {});
+  });
+}
+
 function init() {
+  setupWindowDrag();
   applyUnitUI();
   if (localStorage.getItem("use-location") === "1") {
     useCurrentLocation();
