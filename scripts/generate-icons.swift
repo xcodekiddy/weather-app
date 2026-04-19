@@ -54,7 +54,7 @@ func drawDrop(_ ctx: CGContext, x: CGFloat, y: CGFloat, scale: CGFloat) {
   path.closeSubpath()
 
   ctx.addPath(path)
-  ctx.setFillColor(color(0x29b6f6))
+  ctx.setFillColor(color(0x2ba7f4))
   ctx.fillPath()
 
   ctx.addEllipse(in: CGRect(x: x - 14 * scale, y: y + 54 * scale, width: 15 * scale, height: 29 * scale))
@@ -62,113 +62,135 @@ func drawDrop(_ ctx: CGContext, x: CGFloat, y: CGFloat, scale: CGFloat) {
   ctx.fillPath()
 }
 
+func drawSnowflake(_ ctx: CGContext, center: CGPoint, radius: CGFloat) {
+  ctx.saveGState()
+  ctx.translateBy(x: center.x, y: center.y)
+  ctx.setLineWidth(radius * 0.14)
+  ctx.setLineCap(.round)
+  ctx.setStrokeColor(color(0xffffff, 0.96))
+  ctx.setShadow(offset: CGSize(width: 0, height: 6), blur: 12, color: color(0x1f2937, 0.28))
+
+  for i in 0..<6 {
+    ctx.saveGState()
+    ctx.rotate(by: CGFloat(i) * .pi / 3)
+    ctx.move(to: CGPoint(x: 0, y: -radius))
+    ctx.addLine(to: CGPoint(x: 0, y: radius))
+    ctx.strokePath()
+
+    ctx.move(to: CGPoint(x: 0, y: -radius * 0.48))
+    ctx.addLine(to: CGPoint(x: -radius * 0.24, y: -radius * 0.72))
+    ctx.strokePath()
+
+    ctx.move(to: CGPoint(x: 0, y: -radius * 0.48))
+    ctx.addLine(to: CGPoint(x: radius * 0.24, y: -radius * 0.72))
+    ctx.strokePath()
+    ctx.restoreGState()
+  }
+
+  ctx.restoreGState()
+}
+
 func drawIcon(_ ctx: CGContext) {
   ctx.saveGState()
   ctx.translateBy(x: 0, y: 1024)
   ctx.scaleBy(x: 1, y: -1)
 
-  let bounds = CGRect(x: 48, y: 48, width: 928, height: 928)
-  let rounded = CGPath(roundedRect: bounds, cornerWidth: 220, cornerHeight: 220, transform: nil)
-  ctx.addPath(rounded)
-  ctx.clip()
-
   drawLinearGradient(
     ctx,
-    colors: [color(0x0f172a), color(0x1e3a8a), color(0x0ea5e9)],
-    locations: [0, 0.68, 1],
-    start: CGPoint(x: 110, y: 80),
-    end: CGPoint(x: 900, y: 960)
+    colors: [color(0x010707), color(0x162126), color(0x2d281f)],
+    locations: [0, 0.48, 1],
+    start: CGPoint(x: 512, y: 0),
+    end: CGPoint(x: 512, y: 1024)
   )
 
   ctx.setBlendMode(.screen)
-  ctx.addEllipse(in: CGRect(x: -155, y: -90, width: 560, height: 560))
-  ctx.setFillColor(color(0x60a5fa, 0.42))
+  ctx.addEllipse(in: CGRect(x: 178, y: 32, width: 660, height: 530))
+  ctx.setFillColor(color(0x8bdcff, 0.34))
   ctx.fillPath()
 
-  ctx.addEllipse(in: CGRect(x: 570, y: 42, width: 570, height: 570))
-  ctx.setFillColor(color(0xa78bfa, 0.34))
-  ctx.fillPath()
-
-  ctx.addEllipse(in: CGRect(x: 188, y: 650, width: 640, height: 520))
-  ctx.setFillColor(color(0xf472b6, 0.24))
+  ctx.addEllipse(in: CGRect(x: 96, y: 252, width: 780, height: 620))
+  ctx.setFillColor(color(0xffd38a, 0.26))
   ctx.fillPath()
   ctx.setBlendMode(.normal)
 
-  ctx.addEllipse(in: CGRect(x: 94, y: 94, width: 850, height: 520))
-  ctx.setFillColor(color(0xffffff, 0.07))
-  ctx.fillPath()
-
-  let card = CGRect(x: 138, y: 218, width: 748, height: 586)
-  let cardPath = CGPath(roundedRect: card, cornerWidth: 86, cornerHeight: 86, transform: nil)
-  ctx.setShadow(offset: CGSize(width: 0, height: 38), blur: 58, color: color(0x020617, 0.42))
-  ctx.addPath(cardPath)
-  ctx.setFillColor(color(0xffffff, 0.10))
+  ctx.setShadow(offset: CGSize(width: 0, height: 0), blur: 78, color: color(0x9ee7ff, 0.58))
+  let tile = CGRect(x: 196, y: 198, width: 632, height: 608)
+  let tilePath = CGPath(roundedRect: tile, cornerWidth: 132, cornerHeight: 132, transform: nil)
+  ctx.addPath(tilePath)
+  ctx.setFillColor(color(0xffffff, 0.28))
   ctx.fillPath()
   ctx.setShadow(offset: .zero, blur: 0, color: nil)
 
-  ctx.addPath(cardPath)
-  ctx.setLineWidth(4)
-  ctx.setStrokeColor(color(0xffffff, 0.20))
+  ctx.saveGState()
+  ctx.addPath(tilePath)
+  ctx.clip()
+  drawLinearGradient(
+    ctx,
+    colors: [color(0x85dbff), color(0xe5f4ff), color(0xffc978)],
+    locations: [0, 0.57, 1],
+    start: CGPoint(x: 512, y: 194),
+    end: CGPoint(x: 512, y: 810)
+  )
+
+  ctx.addEllipse(in: CGRect(x: 186, y: 176, width: 648, height: 388))
+  ctx.setFillColor(color(0xffffff, 0.11))
+  ctx.fillPath()
+
+  ctx.addPath(tilePath)
+  ctx.setLineWidth(1.5)
+  ctx.setStrokeColor(color(0xffffff, 0.35))
   ctx.strokePath()
 
-  ctx.saveGState()
-  ctx.addPath(cardPath)
-  ctx.clip()
-  ctx.addEllipse(in: CGRect(x: 120, y: 160, width: 780, height: 330))
-  ctx.setFillColor(color(0xffffff, 0.10))
-  ctx.fillPath()
-  ctx.restoreGState()
-
-  let sunCenter = CGPoint(x: 374, y: 390)
-  ctx.setLineWidth(30)
+  let sunCenter = CGPoint(x: 434, y: 462)
+  ctx.setLineWidth(24)
   ctx.setLineCap(.round)
-  ctx.setStrokeColor(color(0xfde68a, 0.80))
+  ctx.setStrokeColor(color(0xfff63b, 0.95))
   for i in 0..<8 {
     let angle = CGFloat(i) * .pi / 4
-    let inner = CGPoint(x: sunCenter.x + cos(angle) * 92, y: sunCenter.y + sin(angle) * 92)
-    let outer = CGPoint(x: sunCenter.x + cos(angle) * 146, y: sunCenter.y + sin(angle) * 146)
+    let inner = CGPoint(x: sunCenter.x + cos(angle) * 126, y: sunCenter.y + sin(angle) * 126)
+    let outer = CGPoint(x: sunCenter.x + cos(angle) * 174, y: sunCenter.y + sin(angle) * 174)
     ctx.move(to: inner)
     ctx.addLine(to: outer)
     ctx.strokePath()
   }
 
   ctx.saveGState()
-  ctx.addEllipse(in: CGRect(x: 284, y: 300, width: 180, height: 180))
+  ctx.addEllipse(in: CGRect(x: 316, y: 345, width: 236, height: 236))
   ctx.clip()
   drawLinearGradient(
     ctx,
-    colors: [color(0xfff6a5), color(0xfacc15)],
+    colors: [color(0xffff42), color(0xffb618)],
     locations: [0, 1],
-    start: CGPoint(x: 310, y: 315),
-    end: CGPoint(x: 444, y: 470)
+    start: CGPoint(x: 360, y: 356),
+    end: CGPoint(x: 522, y: 560)
   )
   ctx.restoreGState()
 
-  ctx.setShadow(offset: CGSize(width: 0, height: 28), blur: 38, color: color(0x020617, 0.24))
-  let cloud = CGMutablePath()
-  cloud.addEllipse(in: CGRect(x: 260, y: 456, width: 250, height: 238))
-  cloud.addEllipse(in: CGRect(x: 406, y: 378, width: 318, height: 318))
-  cloud.addEllipse(in: CGRect(x: 620, y: 472, width: 205, height: 210))
-  cloud.addRoundedRect(in: CGRect(x: 242, y: 568, width: 612, height: 196), cornerWidth: 94, cornerHeight: 94)
-  ctx.addPath(cloud)
-  ctx.setFillColor(color(0xf8fafc, 0.96))
+  ctx.setShadow(offset: CGSize(width: 0, height: 20), blur: 40, color: color(0x0f172a, 0.24))
+  ctx.setFillColor(color(0xe8ece8, 0.78))
+  ctx.addEllipse(in: CGRect(x: 252, y: 520, width: 300, height: 162))
+  ctx.fillPath()
+  ctx.addEllipse(in: CGRect(x: 438, y: 390, width: 268, height: 268))
+  ctx.fillPath()
+  ctx.addEllipse(in: CGRect(x: 632, y: 464, width: 154, height: 158))
+  ctx.fillPath()
+  ctx.addPath(CGPath(
+    roundedRect: CGRect(x: 254, y: 518, width: 520, height: 132),
+    cornerWidth: 66,
+    cornerHeight: 66,
+    transform: nil
+  ))
   ctx.fillPath()
   ctx.setShadow(offset: .zero, blur: 0, color: nil)
 
-  let cloudTint = CGMutablePath()
-  cloudTint.addRoundedRect(in: CGRect(x: 292, y: 653, width: 496, height: 64), cornerWidth: 31, cornerHeight: 31)
-  ctx.addPath(cloudTint)
-  ctx.setFillColor(color(0xdbeafe, 0.76))
+  ctx.addEllipse(in: CGRect(x: 464, y: 414, width: 166, height: 80))
+  ctx.setFillColor(color(0xffffff, 0.18))
   ctx.fillPath()
 
-  ctx.addEllipse(in: CGRect(x: 438, y: 416, width: 220, height: 104))
-  ctx.setFillColor(color(0xffffff, 0.30))
-  ctx.fillPath()
+  drawDrop(ctx, x: 580, y: 610, scale: 0.62)
+  drawSnowflake(ctx, center: CGPoint(x: 660, y: 654), radius: 38)
 
-  drawDrop(ctx, x: 342, y: 732, scale: 0.46)
-  drawDrop(ctx, x: 510, y: 758, scale: 0.56)
-  drawDrop(ctx, x: 680, y: 732, scale: 0.46)
-
+  ctx.restoreGState()
   ctx.restoreGState()
 }
 
