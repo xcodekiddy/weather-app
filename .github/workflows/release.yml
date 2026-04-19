@@ -27,7 +27,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: .
-          tauriScript: cargo tauri
           args: --bundles nsis,msi
           tagName: ${{ github.ref_name }}
           releaseName: "Weather ${{ github.ref_name }}"
