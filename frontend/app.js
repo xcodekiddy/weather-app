@@ -218,13 +218,24 @@ function renderForecast(data) {
 
 async function loadAndRender(coords, placeLabel) {
   setStatus("Loading weather…");
+  const hasContent = !els.current.hidden;
+  if (hasContent) document.body.classList.add("is-updating");
   try {
     const data = await fetchWeather(coords.latitude, coords.longitude);
     renderCurrent(placeLabel, data);
     renderHourly(data);
     renderForecast(data);
     setStatus("");
+    if (hasContent) {
+      requestAnimationFrame(() => {
+        document.body.classList.remove("is-updating");
+      });
+    }
+    els.temp.classList.remove("flash");
+    void els.temp.offsetWidth;
+    els.temp.classList.add("flash");
   } catch (err) {
+    document.body.classList.remove("is-updating");
     setStatus(err.message, true);
   }
 }
@@ -436,6 +447,23 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".search-wrap")) hideSuggestions();
 });
 
+function setupExternalLinks() {
+  const openExternal = (url) => {
+    const opener = window.__TAURI__?.opener?.openUrl;
+    if (opener) {
+      opener(url).catch((err) => console.error("Failed to open URL", err));
+    } else {
+      window.open(url, "_blank", "noopener");
+    }
+  };
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="http"]');
+    if (!a) return;
+    e.preventDefault();
+    openExternal(a.href);
+  });
+}
+
 function setupWindowDrag() {
   const dragRegion = document.querySelector("[data-window-drag]");
   const getCurrentWindow = window.__TAURI__?.window?.getCurrentWindow;
@@ -450,6 +478,7 @@ function setupWindowDrag() {
 
 function init() {
   setupWindowDrag();
+  setupExternalLinks();
   applyUnitUI();
   if (localStorage.getItem("use-location") === "1") {
     useCurrentLocation();
