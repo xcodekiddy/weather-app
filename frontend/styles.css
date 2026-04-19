@@ -47,6 +47,59 @@ html, body {
   overscroll-behavior: none;
 }
 
+/* Custom macOS title bar — hidden by default, shown via .is-mac */
+.titlebar {
+  display: none;
+}
+
+body.is-mac .titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 80px; /* reserve space for traffic lights */
+  padding-right: 80px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  app-region: drag;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.3s var(--ease-smooth);
+}
+
+body.is-mac .titlebar:hover {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0));
+}
+
+body.is-mac .titlebar:active {
+  cursor: grabbing;
+}
+
+body.is-mac .titlebar .grip {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.25s var(--ease-smooth), transform 0.25s var(--ease-smooth), width 0.25s var(--ease-smooth);
+}
+
+body.is-mac .titlebar:hover .grip {
+  background: rgba(255, 255, 255, 0.45);
+  width: 52px;
+}
+
+body.is-mac .app {
+  padding-top: 52px;
+}
+
 /* Animated color blobs */
 .blobs {
   position: fixed;

@@ -447,6 +447,11 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".search-wrap")) hideSuggestions();
 });
 
+function setupPlatformClass() {
+  const isMac = /Mac OS|Macintosh/i.test(navigator.userAgent) || (navigator.platform || "").startsWith("Mac");
+  if (isMac) document.body.classList.add("is-mac");
+}
+
 function setupExternalLinks() {
   const openExternal = (url) => {
     const opener = window.__TAURI__?.opener?.openUrl;
@@ -477,6 +482,7 @@ function setupWindowDrag() {
 }
 
 function init() {
+  setupPlatformClass();
   setupWindowDrag();
   setupExternalLinks();
   applyUnitUI();
