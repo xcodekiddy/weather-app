@@ -7,44 +7,63 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            args: --bundles nsis,msi
+            artifact-name: windows-installers
+            artifact-paths: |
+              src-tauri/target/release/bundle/nsis/*.exe
+              src-tauri/target/release/bundle/msi/*.msi
+            rust-targets: ""
+          - platform: macos-latest
+            args: --bundles dmg --target universal-apple-darwin
+            artifact-name: macos-installer
+            artifact-paths: |
+              src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            rust-targets: "aarch64-apple-darwin,x86_64-apple-darwin"
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
 
-      - name: Build Tauri app (NSIS + MSI)
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: .
-          args: --bundles nsis,msi
+          args: ${{ matrix.args }}
           tagName: ${{ github.ref_name }}
           releaseName: "Weather ${{ github.ref_name }}"
           releaseBody: |
-            Windows installers for Weather.
-            - `Weather_*_x64-setup.exe` — NSIS installer (recommended, smaller, per-user)
-            - `Weather_*_x64_en-US.msi` — MSI installer (enterprise / group-policy)
-            App is not code-signed, so SmartScreen may warn on first launch. Click "More info" → "Run anyway".
+            Installers for Weather.
+            - Windows: `Weather_*_x64-setup.exe` (NSIS, recommended) or `Weather_*_x64_en-US.msi`
+            - macOS: `Weather_*_universal.dmg` (runs on Intel and Apple Silicon)
+            Apps are not code-signed:
+            - Windows: SmartScreen → "More info" → "Run anyway".
+            - macOS: right-click the app → Open → Open, or run `xattr -dr com.apple.quarantine /Applications/Weather.app`.
           releaseDraft: false
           prerelease: false
 
       - name: Upload installers as workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installers
-          path: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-paths }}
           if-no-files-found: warn
