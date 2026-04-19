@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background: soft blue gradient matching app theme -->
+    <linearGradient id="bg" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#60A5FA"/>
+      <stop offset="0.5" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+
+    <!-- Sun: warm radial gradient -->
+    <radialGradient id="sun" cx="0.4" cy="0.4" r="0.7">
+      <stop offset="0" stop-color="#FEF9C3"/>
+      <stop offset="0.55" stop-color="#FCD34D"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </radialGradient>
+
+    <!-- Sun glow -->
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FDE68A" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#FDE68A" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Cloud: subtle gradient for dimension -->
+    <linearGradient id="cloud" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+
+    <!-- Top inner highlight for depth -->
+    <linearGradient id="topGlow" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.25"/>
+      <stop offset="0.4" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Cloud soft shadow -->
+    <filter id="cloudShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dy="12"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Squircle clip path for proper macOS corner shape -->
+    <clipPath id="squircle">
+      <path d="M 0,512 C 0,115 115,0 512,0 C 909,0 1024,115 1024,512 C 1024,909 909,1024 512,1024 C 115,1024 0,909 0,512 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#squircle)">
+    <!-- Background -->
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+
+    <!-- Top highlight -->
+    <rect width="1024" height="1024" fill="url(#topGlow)"/>
+
+    <!-- Sun glow (behind sun) -->
+    <circle cx="400" cy="400" r="360" fill="url(#sunGlow)"/>
+
+    <!-- Sun -->
+    <circle cx="400" cy="400" r="170" fill="url(#sun)"/>
+
+    <!-- Cloud -->
+    <g filter="url(#cloudShadow)" fill="url(#cloud)">
+      <path d="
+        M 290,720
+        Q 260,720 240,700
+        Q 200,680 200,630
+        Q 200,565 265,550
+        Q 275,475 355,465
+        Q 400,400 490,400
+        Q 590,400 620,485
+        Q 680,475 720,515
+        Q 790,510 815,570
+        Q 860,590 855,650
+        Q 855,720 780,720
+        Z" />
+    </g>
+
+    <!-- Subtle top inner stroke -->
+    <path d="M 0,512 C 0,115 115,0 512,0 C 909,0 1024,115 1024,512 C 1024,909 909,1024 512,1024 C 115,1024 0,909 0,512 Z"
+          fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="2"/>
+  </g>
+</svg>
