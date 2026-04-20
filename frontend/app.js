@@ -547,13 +547,23 @@ function setupPlatformClass() {
   const isMac = /Mac OS|Macintosh/i.test(navigator.userAgent) || (navigator.platform || "").startsWith("Mac");
   if (isMac) {
     document.body.classList.add("is-mac");
+    // Promote placeholder data-mac-drag attributes to the real
+    // data-tauri-drag-region that Tauri recognizes. Doing this in JS
+    // (rather than baking it into the HTML) means Tauri never sees the
+    // attribute on Windows/Linux, so the WebView2 drag-region handler
+    // never gets installed and can't swallow mouse-wheel events.
+    document.querySelectorAll("[data-mac-drag]").forEach((el) => {
+      el.setAttribute("data-tauri-drag-region", "");
+      el.removeAttribute("data-mac-drag");
+    });
     return;
   }
-  // On Windows/Linux, strip every data-tauri-drag-region attribute so the
-  // runtime never attaches a drag handler and WebView2 never sees the
-  // region as a non-client title bar. This is what actually blocks scroll.
-  document.querySelectorAll("[data-tauri-drag-region]").forEach((el) => {
+  // Defense in depth on Windows/Linux: anything that's still wearing a
+  // mac-drag marker (or somehow got the Tauri one) gets a no-drag inline
+  // style so Chromium doesn't treat it as a non-client region.
+  document.querySelectorAll("[data-mac-drag], [data-tauri-drag-region]").forEach((el) => {
     el.removeAttribute("data-tauri-drag-region");
+    el.removeAttribute("data-mac-drag");
     el.style.setProperty("-webkit-app-region", "no-drag", "important");
     el.style.setProperty("app-region", "no-drag", "important");
   });

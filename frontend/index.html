@@ -9,10 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://api.open-meteo.com" />
   <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
-  <div class="titlebar" data-tauri-drag-region aria-hidden="true">
+  <div class="titlebar" data-mac-drag aria-hidden="true">
     <span class="grip"></span>
   </div>
 
@@ -23,10 +23,10 @@
   </div>
 
   <main class="app">
-    <header class="hero" data-window-drag data-tauri-drag-region>
-      <div class="hero-top" data-tauri-drag-region>
-        <div class="drag-title" data-tauri-drag-region>
-          <h1 data-tauri-drag-region>Weather</h1>
+    <header class="hero" data-window-drag data-mac-drag>
+      <div class="hero-top" data-mac-drag>
+        <div class="drag-title" data-mac-drag>
+          <h1 data-mac-drag>Weather</h1>
         </div>
         <div class="unit-toggle" role="group" aria-label="Temperature unit" data-no-drag>
           <button type="button" data-unit="f" class="active">°F</button>
@@ -114,6 +114,6 @@
     </footer>
   </main>
 
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
