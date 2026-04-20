@@ -1,5 +1,7 @@
 const GEOCODE_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+const FAVORITES_KEY = "weather-favorites";
+const MAX_FAVORITES = 12;
 
 const ICON_BASE = "https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg";
 
@@ -50,6 +52,10 @@ const els = {
   input: document.getElementById("search-input"),
   locateBtn: document.getElementById("locate-btn"),
   suggestions: document.getElementById("suggestions"),
+  favorites: document.getElementById("favorites"),
+  favoritesList: document.getElementById("favorites-list"),
+  clearFavorites: document.getElementById("clear-favorites"),
+  favoriteToggle: document.getElementById("favorite-toggle"),
   unitToggle: document.querySelector(".unit-toggle"),
   status: document.getElementById("status"),
   current: document.getElementById("current"),
@@ -70,6 +76,8 @@ const els = {
 
 const state = {
   unit: localStorage.getItem("unit") === "c" ? "c" : "f",
+  favorites: readFavorites(),
+  activePlace: null,
   refresh: null,
 };
 
@@ -108,6 +116,105 @@ function formatHour(dateStr, isNow) {
   return d.toLocaleTimeString(undefined, { hour: "numeric" });
 }
 
+function placeName(place) {
+  return [place?.name, place?.admin1, place?.country].filter(Boolean).join(", ");
+}
+
+function normalizePlace(place, coords = place) {
+  const latitude = Number(coords?.latitude);
+  const longitude = Number(coords?.longitude);
+  return {
+    name: place?.name || "Saved location",
+    admin1: place?.admin1 || "",
+    country: place?.country || "",
+    latitude,
+    longitude,
+  };
+}
+
+function isValidPlace(place) {
+  return place &&
+    typeof place.name === "string" &&
+    Number.isFinite(Number(place.latitude)) &&
+    Number.isFinite(Number(place.longitude));
+}
+
+function placeKey(place) {
+  const lat = Number(place.latitude).toFixed(4);
+  const lon = Number(place.longitude).toFixed(4);
+  return `${place.name}|${place.admin1 || ""}|${place.country || ""}|${lat}|${lon}`.toLowerCase();
+}
+
+function readFavorites() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((place) => normalizePlace(place))
+      .filter(isValidPlace)
+      .slice(0, MAX_FAVORITES);
+  } catch {
+    return [];
+  }
+}
+
+function saveFavorites(favorites) {
+  state.favorites = favorites.slice(0, MAX_FAVORITES);
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(state.favorites));
+  renderFavorites();
+  updateFavoriteToggle();
+}
+
+function updateFavoriteToggle() {
+  const place = state.activePlace;
+  if (!place || !els.favoriteToggle) return;
+  const saved = state.favorites.some((favorite) => placeKey(favorite) === placeKey(place));
+  els.favoriteToggle.textContent = saved ? "Saved" : "Save city";
+  els.favoriteToggle.setAttribute("aria-pressed", saved ? "true" : "false");
+}
+
+function renderFavorites() {
+  if (!els.favorites || !els.favoritesList) return;
+  const favorites = state.favorites;
+  els.favorites.hidden = favorites.length === 0;
+  els.favoritesList.innerHTML = favorites.map((place, i) => {
+    const label = placeName(place);
+    const region = [place.admin1, place.country].filter(Boolean).join(", ");
+    return `
+      <li data-idx="${i}" style="--i:${i}">
+        <button type="button" class="favorite-city" title="${escapeHtml(label)}">
+          <span class="favorite-name">${escapeHtml(place.name)}</span>
+          ${region ? `<span class="favorite-region">${escapeHtml(region)}</span>` : ""}
+        </button>
+        <button type="button" class="favorite-remove" aria-label="Remove ${escapeHtml(label)}">Remove</button>
+      </li>
+    `;
+  }).join("");
+}
+
+function toggleFavorite() {
+  const place = state.activePlace;
+  if (!place || !isValidPlace(place)) return;
+  const key = placeKey(place);
+  const exists = state.favorites.some((favorite) => placeKey(favorite) === key);
+  if (exists) {
+    saveFavorites(state.favorites.filter((favorite) => placeKey(favorite) !== key));
+    return;
+  }
+  saveFavorites([place, ...state.favorites.filter((favorite) => placeKey(favorite) !== key)]);
+}
+
+function loadFavorite(idx) {
+  const place = state.favorites[idx];
+  if (!place) return;
+  els.input.value = place.name;
+  localStorage.setItem("last-city", place.name);
+  localStorage.removeItem("use-location");
+  hideSuggestions();
+  state.refresh = () => loadAndRender(place, place);
+  loadAndRender(place, place);
+}
+
 async function geocode(query) {
   const url = `${GEOCODE_URL}?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
   const res = await fetch(url);
@@ -125,7 +232,7 @@ async function fetchWeather(lat, lon) {
     latitude: lat,
     longitude: lon,
     current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m",
-    hourly: "temperature_2m,weather_code,is_day",
+    hourly: "temperature_2m,weather_code,is_day,precipitation_probability",
     daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum",
     temperature_unit: isC ? "celsius" : "fahrenheit",
     wind_speed_unit: isC ? "kmh" : "mph",
@@ -138,10 +245,22 @@ async function fetchWeather(lat, lon) {
   return res.json();
 }
 
-function renderCurrent(place, data) {
+async function updateTrayTemperature(label, tooltip) {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) return;
+  try {
+    await invoke("update_tray_temperature", { label, tooltip });
+  } catch (err) {
+    console.error("Failed to update tray temperature:", err);
+  }
+}
+
+function renderCurrent(place, data, coords = place) {
   const c = data.current;
   const d = describe(c.weather_code);
-  const name = [place.name, place.admin1, place.country].filter(Boolean).join(", ");
+  const currentPlace = normalizePlace(place, coords);
+  const name = placeName(currentPlace);
+  state.activePlace = currentPlace;
   els.location.textContent = name;
   const now = new Date(c.time);
   els.localTime.textContent = now.toLocaleString(undefined, {
@@ -157,6 +276,9 @@ function renderCurrent(place, data) {
   els.wind.textContent = formatWind(c.wind_speed_10m, c.wind_direction_10m);
   const precipUnit = state.unit === "c" ? "mm" : "in";
   els.precip.textContent = `${c.precipitation} ${precipUnit}`;
+  const tempLabel = `${Math.round(c.temperature_2m)}°${state.unit.toUpperCase()}`;
+  updateFavoriteToggle();
+  updateTrayTemperature(tempLabel, `${name}: ${tempLabel}, ${d.label}`);
   setTheme(c.weather_code, c.is_day);
   els.current.hidden = false;
 }
@@ -170,13 +292,15 @@ function renderHourly(data) {
 
   const items = [];
   for (let i = startIdx; i < end; i++) {
-    const d = describe(h.weather_code[i]);
     const isNow = i === startIdx;
+    const precipChance = h.precipitation_probability?.[i];
+    const precipLabel = Number.isFinite(precipChance) ? `${Math.round(precipChance)}% rain` : "Rain --";
     items.push(`
       <li class="${isNow ? "now" : ""}" style="--i:${i - startIdx}">
         <span class="h-time">${formatHour(h.time[i], isNow)}</span>
         <span class="h-icon">${weatherImg(h.weather_code[i], h.is_day[i], 28)}</span>
         <span class="h-temp">${Math.round(h.temperature_2m[i])}°</span>
+        <span class="h-pop">${precipLabel}</span>
       </li>
     `);
   }
@@ -222,7 +346,7 @@ async function loadAndRender(coords, placeLabel) {
   if (hasContent) document.body.classList.add("is-updating");
   try {
     const data = await fetchWeather(coords.latitude, coords.longitude);
-    renderCurrent(placeLabel, data);
+    renderCurrent(placeLabel, data, coords);
     renderHourly(data);
     renderForecast(data);
     setStatus("");
@@ -420,6 +544,20 @@ els.form.addEventListener("submit", (e) => {
 });
 
 els.locateBtn.addEventListener("click", useCurrentLocation);
+els.favoriteToggle.addEventListener("click", toggleFavorite);
+els.clearFavorites.addEventListener("click", () => saveFavorites([]));
+els.favoritesList.addEventListener("click", (e) => {
+  const li = e.target.closest("li[data-idx]");
+  if (!li) return;
+  const idx = Number(li.dataset.idx);
+  if (e.target.closest(".favorite-remove")) {
+    const next = state.favorites.slice();
+    next.splice(idx, 1);
+    saveFavorites(next);
+    return;
+  }
+  loadFavorite(idx);
+});
 
 /* ---------- Autocomplete suggestions ---------- */
 
@@ -606,6 +744,7 @@ function init() {
   setupWindowDrag();
   setupExternalLinks();
   applyUnitUI();
+  renderFavorites();
   if (localStorage.getItem("use-location") === "1") {
     useCurrentLocation();
     return;

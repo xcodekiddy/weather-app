@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://api.open-meteo.com" />
   <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <div class="titlebar" data-mac-drag aria-hidden="true">
@@ -67,6 +67,13 @@
         </form>
         <ul id="suggestions" class="suggestions card" role="listbox" hidden data-no-drag></ul>
       </div>
+      <section id="favorites" class="favorites" aria-label="Saved cities" hidden data-no-drag>
+        <div class="favorites-head">
+          <span>Saved cities</span>
+          <button type="button" id="clear-favorites" class="clear-favorites">Clear</button>
+        </div>
+        <ul id="favorites-list" class="favorites-list"></ul>
+      </section>
     </header>
 
     <section id="status" class="status" aria-live="polite"></section>
@@ -77,7 +84,10 @@
           <h2 id="location" class="location"></h2>
           <p id="local-time" class="local-time"></p>
         </div>
-        <div id="icon" class="icon" aria-hidden="true"></div>
+        <div class="current-actions">
+          <button type="button" id="favorite-toggle" class="favorite-toggle" aria-pressed="false">Save city</button>
+          <div id="icon" class="icon" aria-hidden="true"></div>
+        </div>
       </div>
       <div class="current-mid">
         <p class="temperature"><span id="temp"></span><span class="deg">°</span></p>
@@ -114,6 +124,6 @@
     </footer>
   </main>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

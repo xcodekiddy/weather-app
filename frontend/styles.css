@@ -414,6 +414,139 @@ input {
   text-overflow: ellipsis;
 }
 
+.favorites {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+.favorites-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.clear-favorites {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  opacity: 0.75;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.clear-favorites:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.favorites-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 2px 2px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.favorites-list::-webkit-scrollbar { height: 6px; }
+.favorites-list::-webkit-scrollbar-track { background: transparent; }
+.favorites-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 99px;
+}
+
+.favorites-list li {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  animation: fadeSlideUp 0.45s var(--ease-smooth) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+.favorite-city,
+.favorite-remove {
+  border: 0;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.favorite-city {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 170px;
+  min-width: 104px;
+  background: transparent;
+  padding: 8px 12px 8px 14px;
+}
+
+.favorite-city:hover,
+.favorite-city:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.favorite-name,
+.favorite-region {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favorite-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.favorite-region {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.favorite-remove {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.favorite-remove:hover,
+.favorite-remove:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--text);
+}
+
 @keyframes dropIn {
   from { opacity: 0; transform: translateY(-6px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -515,6 +648,39 @@ input {
   height: 80px;
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.25));
   animation: iconIn 0.5s var(--ease-smooth) both;
+}
+
+.current-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.favorite-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.favorite-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1px);
+}
+
+.favorite-toggle[aria-pressed="true"] {
+  background: var(--text);
+  border-color: var(--text);
+  color: #0f172a;
 }
 
 @keyframes float {
@@ -657,7 +823,7 @@ input {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  min-width: 58px;
+  min-width: 72px;
   padding: 10px 6px;
   border-radius: 12px;
   scroll-snap-align: start;
@@ -693,6 +859,13 @@ input {
 }
 
 .hourly-list .h-temp { font-weight: 600; font-size: 15px; }
+
+.hourly-list .h-pop {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 /* Forecast */
 .forecast-list {
