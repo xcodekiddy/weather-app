@@ -473,6 +473,9 @@ function setupExternalLinks() {
 }
 
 function setupWindowDrag() {
+  // Only on macOS (no native title bar). On Windows/Linux this interferes
+  // with scrolling and is unnecessary since the native title bar handles drags.
+  if (!document.body.classList.contains("is-mac")) return;
   const dragRegion = document.querySelector("[data-window-drag]");
   const getCurrentWindow = window.__TAURI__?.window?.getCurrentWindow;
   if (!dragRegion || !getCurrentWindow) return;

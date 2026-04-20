@@ -148,12 +148,27 @@ body.is-mac .app {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Only treat the hero as a drag region on macOS (where we hide the native
+   title bar). On Windows/Linux, WebView2 swallows mouse-wheel events over
+   drag regions, which breaks scrolling, and the native OS title bar already
+   provides a drag affordance. */
+body.is-mac .hero {
   cursor: grab;
   -webkit-app-region: drag;
   app-region: drag;
 }
 
-.hero:active { cursor: grabbing; }
+body.is-mac .hero:active { cursor: grabbing; }
+
+/* Neutralize any data-tauri-drag-region attributes on non-macOS platforms.
+   Tauri injects -webkit-app-region:drag at runtime for these; on Windows
+   that captures mouse-wheel events and blocks scrolling. */
+body:not(.is-mac) [data-tauri-drag-region] {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
 
 .hero-top {
   display: flex;
