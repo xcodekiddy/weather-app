@@ -263,12 +263,43 @@ async function showWeatherForCoords(lat, lon, label) {
 // blocked by the user's network, or temporarily down.
 const IP_LOCATION_PROVIDERS = [
   {
+    name: "geojs.io",
+    url: "https://get.geojs.io/v1/ip/geo.json",
+    parse: (d) => ({
+      // geojs returns lat/lon as strings
+      lat: parseFloat(d.latitude),
+      lon: parseFloat(d.longitude),
+      city: d.city,
+      region: d.region,
+    }),
+  },
+  {
+    name: "ipinfo.io",
+    url: "https://ipinfo.io/json",
+    parse: (d) => {
+      // ipinfo packs "lat,lng" into d.loc
+      if (typeof d.loc !== "string") throw new Error("no loc field");
+      const [lat, lon] = d.loc.split(",").map(parseFloat);
+      return { lat, lon, city: d.city, region: d.region };
+    },
+  },
+  {
     name: "ipwho.is",
     url: "https://ipwho.is/",
     parse: (d) => {
       if (d.success === false) throw new Error(d.message || "lookup failed");
       return { lat: d.latitude, lon: d.longitude, city: d.city, region: d.region };
     },
+  },
+  {
+    name: "ifconfig.co",
+    url: "https://ifconfig.co/json",
+    parse: (d) => ({
+      lat: d.latitude,
+      lon: d.longitude,
+      city: d.city,
+      region: d.region_name,
+    }),
   },
   {
     name: "ipapi.co",
@@ -290,6 +321,22 @@ const IP_LOCATION_PROVIDERS = [
   },
 ];
 
+// Last-resort fallback: derive a city name from the browser's timezone
+// (e.g. "America/New_York" -> "New York") and feed it through the
+// open-meteo geocoder, which we know the user can reach because it's
+// the same API that serves weather data.
+async function fetchTimezoneLocation() {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (!tz || !tz.includes("/")) throw new Error("no timezone");
+  const city = tz.split("/").pop().replace(/_/g, " ");
+  const place = await geocode(city);
+  return {
+    latitude: place.latitude,
+    longitude: place.longitude,
+    label: `${place.name}${place.admin1 ? ", " + place.admin1 : ""}`,
+  };
+}
+
 async function fetchIpLocation() {
   const errors = [];
   for (const p of IP_LOCATION_PROVIDERS) {
@@ -298,7 +345,8 @@ async function fetchIpLocation() {
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       const { lat, lon, city, region } = p.parse(data);
-      if (typeof lat !== "number" || typeof lon !== "number") {
+      if (typeof lat !== "number" || !isFinite(lat) ||
+          typeof lon !== "number" || !isFinite(lon)) {
         throw new Error("no coordinates in response");
       }
       const label = city
@@ -309,7 +357,13 @@ async function fetchIpLocation() {
       errors.push(`${p.name}: ${err.message}`);
     }
   }
-  throw new Error(errors.join(" | ") || "all providers failed");
+  // Final fallback: timezone-based city lookup via open-meteo.
+  try {
+    return await fetchTimezoneLocation();
+  } catch (err) {
+    errors.push(`timezone: ${err.message}`);
+    throw new Error(errors.join(" | ") || "all providers failed");
+  }
 }
 
 async function useCurrentLocation() {
