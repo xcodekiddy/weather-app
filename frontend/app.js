@@ -258,20 +258,58 @@ async function showWeatherForCoords(lat, lon, label) {
   await loadAndRender(coords, placeLabel);
 }
 
+// IP-based geolocation — no permission prompt required. We try several
+// public providers in order because any one of them can be rate-limited,
+// blocked by the user's network, or temporarily down.
+const IP_LOCATION_PROVIDERS = [
+  {
+    name: "ipwho.is",
+    url: "https://ipwho.is/",
+    parse: (d) => {
+      if (d.success === false) throw new Error(d.message || "lookup failed");
+      return { lat: d.latitude, lon: d.longitude, city: d.city, region: d.region };
+    },
+  },
+  {
+    name: "ipapi.co",
+    url: "https://ipapi.co/json/",
+    parse: (d) => {
+      if (d.error) throw new Error(d.reason || "lookup failed");
+      return { lat: d.latitude, lon: d.longitude, city: d.city, region: d.region };
+    },
+  },
+  {
+    name: "freeipapi.com",
+    url: "https://freeipapi.com/api/json",
+    parse: (d) => ({
+      lat: d.latitude,
+      lon: d.longitude,
+      city: d.cityName,
+      region: d.regionName,
+    }),
+  },
+];
+
 async function fetchIpLocation() {
-  // IP-based geolocation — no permission prompt required, works identically
-  // on macOS/Windows/Linux desktop and on the web. City-level accuracy.
-  const res = await fetch("https://ipwho.is/", { cache: "no-store" });
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  const data = await res.json();
-  if (data.success === false) throw new Error(data.message || "Lookup failed");
-  if (typeof data.latitude !== "number" || typeof data.longitude !== "number") {
-    throw new Error("No coordinates returned");
+  const errors = [];
+  for (const p of IP_LOCATION_PROVIDERS) {
+    try {
+      const res = await fetch(p.url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      const { lat, lon, city, region } = p.parse(data);
+      if (typeof lat !== "number" || typeof lon !== "number") {
+        throw new Error("no coordinates in response");
+      }
+      const label = city
+        ? `${city}${region ? ", " + region : ""}`
+        : "Your location";
+      return { latitude: lat, longitude: lon, label };
+    } catch (err) {
+      errors.push(`${p.name}: ${err.message}`);
+    }
   }
-  const label = data.city
-    ? `${data.city}${data.region ? ", " + data.region : ""}`
-    : "Your location";
-  return { latitude: data.latitude, longitude: data.longitude, label };
+  throw new Error(errors.join(" | ") || "all providers failed");
 }
 
 async function useCurrentLocation() {
@@ -285,7 +323,8 @@ async function useCurrentLocation() {
     localStorage.setItem("use-location", "1");
     await showWeatherForCoords(latitude, longitude, label);
   } catch (err) {
-    setStatus("Couldn't determine your location. Try searching for a city.", true);
+    console.error("IP location failed:", err);
+    setStatus(`Couldn't determine your location (${err.message}). Try searching for a city.`, true);
   } finally {
     els.locateBtn.classList.remove("loading");
     els.locateBtn.disabled = false;
