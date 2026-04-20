@@ -258,35 +258,38 @@ async function showWeatherForCoords(lat, lon, label) {
   await loadAndRender(coords, placeLabel);
 }
 
-function useCurrentLocation() {
-  if (!navigator.geolocation) {
-    setStatus("Geolocation is not supported in this browser.", true);
-    return;
+async function fetchIpLocation() {
+  // IP-based geolocation — no permission prompt required, works identically
+  // on macOS/Windows/Linux desktop and on the web. City-level accuracy.
+  const res = await fetch("https://ipwho.is/", { cache: "no-store" });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const data = await res.json();
+  if (data.success === false) throw new Error(data.message || "Lookup failed");
+  if (typeof data.latitude !== "number" || typeof data.longitude !== "number") {
+    throw new Error("No coordinates returned");
   }
+  const label = data.city
+    ? `${data.city}${data.region ? ", " + data.region : ""}`
+    : "Your location";
+  return { latitude: data.latitude, longitude: data.longitude, label };
+}
+
+async function useCurrentLocation() {
   els.locateBtn.classList.add("loading");
   els.locateBtn.disabled = true;
   setStatus("Getting your location…");
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      els.locateBtn.classList.remove("loading");
-      els.locateBtn.disabled = false;
-      els.input.value = "";
-      localStorage.removeItem("last-city");
-      localStorage.setItem("use-location", "1");
-      showWeatherForCoords(pos.coords.latitude, pos.coords.longitude, "Current location");
-    },
-    (err) => {
-      els.locateBtn.classList.remove("loading");
-      els.locateBtn.disabled = false;
-      const msg = err.code === 1
-        ? "Location permission denied."
-        : err.code === 3
-          ? "Location request timed out."
-          : "Couldn't get your location.";
-      setStatus(msg, true);
-    },
-    { timeout: 8000, maximumAge: 60_000 }
-  );
+  try {
+    const { latitude, longitude, label } = await fetchIpLocation();
+    els.input.value = "";
+    localStorage.removeItem("last-city");
+    localStorage.setItem("use-location", "1");
+    await showWeatherForCoords(latitude, longitude, label);
+  } catch (err) {
+    setStatus("Couldn't determine your location. Try searching for a city.", true);
+  } finally {
+    els.locateBtn.classList.remove("loading");
+    els.locateBtn.disabled = false;
+  }
 }
 
 function applyUnitUI() {
@@ -496,19 +499,15 @@ function init() {
     showWeatherFor(saved);
     return;
   }
-  if (navigator.geolocation) {
-    setStatus("Getting your location…");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => showWeatherForCoords(pos.coords.latitude, pos.coords.longitude, "Current location"),
-      () => {
-        setStatus("");
-        showWeatherFor("San Francisco");
-      },
-      { timeout: 6000 }
-    );
-  } else {
-    showWeatherFor("San Francisco");
-  }
+  setStatus("Getting your location…");
+  fetchIpLocation()
+    .then(({ latitude, longitude, label }) =>
+      showWeatherForCoords(latitude, longitude, label)
+    )
+    .catch(() => {
+      setStatus("");
+      showWeatherFor("San Francisco");
+    });
 }
 
 init();
