@@ -163,11 +163,16 @@ body.is-mac .hero {
 body.is-mac .hero:active { cursor: grabbing; }
 
 /* Neutralize any data-tauri-drag-region attributes on non-macOS platforms.
-   Tauri injects -webkit-app-region:drag at runtime for these; on Windows
-   that captures mouse-wheel events and blocks scrolling. */
-body:not(.is-mac) [data-tauri-drag-region] {
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
+   Tauri injects -webkit-app-region:drag as an inline style at runtime, so
+   !important is required to override it. On Windows that drag region
+   captures mouse-wheel events and blocks scrolling. */
+body:not(.is-mac) [data-tauri-drag-region],
+body:not(.is-mac) .hero,
+body:not(.is-mac) .hero-top,
+body:not(.is-mac) .drag-title,
+body:not(.is-mac) .hero h1 {
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
 }
 
 .hero-top {

@@ -452,7 +452,18 @@ document.addEventListener("click", (e) => {
 
 function setupPlatformClass() {
   const isMac = /Mac OS|Macintosh/i.test(navigator.userAgent) || (navigator.platform || "").startsWith("Mac");
-  if (isMac) document.body.classList.add("is-mac");
+  if (isMac) {
+    document.body.classList.add("is-mac");
+    return;
+  }
+  // On Windows/Linux, strip every data-tauri-drag-region attribute so the
+  // runtime never attaches a drag handler and WebView2 never sees the
+  // region as a non-client title bar. This is what actually blocks scroll.
+  document.querySelectorAll("[data-tauri-drag-region]").forEach((el) => {
+    el.removeAttribute("data-tauri-drag-region");
+    el.style.setProperty("-webkit-app-region", "no-drag", "important");
+    el.style.setProperty("app-region", "no-drag", "important");
+  });
 }
 
 function setupExternalLinks() {
